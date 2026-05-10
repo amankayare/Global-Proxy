@@ -3,7 +3,8 @@
 # Exit on error, undefined vars, and pipe failures
 set -euo pipefail
 
-DEPLOY_DIR="/opt/Global-Proxy"
+# Get the directory where the script is located
+DEPLOY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_BRANCH="${1:-main}"
 
 echo "========================================="
