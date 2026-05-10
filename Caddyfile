@@ -23,7 +23,11 @@ amankayare.com {
 
 	# API & static uploads → Dev47 backend
 	handle /api/* {
-		reverse_proxy dev47-backend:5000
+		reverse_proxy dev47-backend:5000 {
+			transport http {
+				read_timeout 180s
+			}
+		}
 	}
 	handle /uploads/* {
 		reverse_proxy dev47-backend:5000
