@@ -1,0 +1,83 @@
+# ============================================================
+# Global Proxy — Caddyfile
+# Single entry point for all services on this server.
+# Add new projects by appending a new site block at the bottom.
+# ============================================================
+
+# ── Portfolio (amankayare.com) ───────────────────────────────
+http://amankayare.com {
+	redir https://amankayare.com{uri} permanent
+}
+
+amankayare.com {
+	encode zstd gzip
+
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer-when-downgrade"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-XSS-Protection "1; mode=block"
+		-Server
+	}
+
+	# API & static uploads → Dev47 backend
+	handle /api/* {
+		reverse_proxy dev47-backend:5000
+	}
+	handle /uploads/* {
+		reverse_proxy dev47-backend:5000
+	}
+	handle /apidocs/* {
+		reverse_proxy dev47-backend:5000
+	}
+	handle /flasgger_static/* {
+		reverse_proxy dev47-backend:5000
+	}
+
+	# SPA frontend → Dev47 frontend (nginx)
+	handle {
+		reverse_proxy dev47-frontend:80
+	}
+}
+
+# ── Email Microservice (email.amankayare.com) ────────────────
+email.amankayare.com {
+	reverse_proxy email-api:8080 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	header {
+		Permissions-Policy "interest-cohort=()"
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}
+
+# ── Polyglot Storage (polyglot.amankayare.com) ──────────────────────────────
+polyglot.amankayare.com {
+	reverse_proxy polyglot-storage-proxy:3000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	encode zstd gzip
+
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer-when-downgrade"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		-Server
+	}
+}
+
+# ── Add future services below ────────────────────────────────
+# new-service.amankayare.com {
+#     reverse_proxy new-service-container:PORT
+# }

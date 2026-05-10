@@ -1,0 +1,23 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: global-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+    networks:
+      - web-network
+
+networks:
+  web-network:
+    name: web-network
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
